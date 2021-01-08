@@ -26,6 +26,7 @@ urlpatterns = [
     # Core
     path('admin/', admin.site.urls),
     path('api-auth/', include('rest_framework.urls')),
+    path('faucet/', include('v1.tnb_faucet.urls')),
 
 ]
 
