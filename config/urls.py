@@ -43,6 +43,7 @@ urlpatterns = [
     # Core
     path('admin/', admin.site.urls),
     path('api-auth/', include('rest_framework.urls')),
+    path('faucet/', include('v1.tnb_faucet.urls')),
 
     # OpenAPI (Swagger)
     url(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),

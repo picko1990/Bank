@@ -1,0 +1,265 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en-US">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta charset="ISO-8859-1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="A Faucet to distribute coins for testing out TheNewBoston Network" />
+    <title>TNB Faucet | Open Blockchain Explorer</title>
+
+    <!-- -----------Google Fonts------------  -->
+    <link rel="preconnect" href="https://fonts.gstatic.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600&display=swap" rel="stylesheet" />
+
+    <!-- -----------Icons------------  -->
+    <link rel="stylesheet"
+        href="https://maxst.icons8.com/vue-static/landings/line-awesome/font-awesome-line-awesome/css/all.min.css" />
+    <link rel="stylesheet" href="{% static 'tnbfaucet/css/style.css' %}" />
+</head>
+
+<body>
+    <header class="header">
+        <img src="{% static 'tnbfaucet/assets/icons/hologram.svg' %}" alt="logo" height="30px" />
+        <h1 class="open-blockchain-explorer">Open Blockchain Explorer</h1>
+    </header>
+
+    <main class="cover">
+        <h1 class="title">TNB Faucet</h1>
+        <h2 class="free-coins-text">I WANT FREE TNB COINS</h2>
+
+        <form class="url-post-form" method="POST">
+            {{ form.errors }}
+            {% csrf_token %}
+            <div class="input-group">
+                {{ form.amount }}
+                <input name="{{ form.url.name }}" type="url" id="{{ form.url.id_for_label }}"
+                    placeholder="URL of a facebook post or tweet containing your thenewboston address..." required />
+            </div>
+            <button type="submit">Collect coins</button>
+        </form>
+
+        <div class="faucet-info">
+            <p>
+                This faucet belongs to the thenewboston testnet. To connect to the TNB
+                Testnet network use
+                <a target="_blank" href="http://52.172.197.46">52.172.197.46</a> as
+                your
+                <b>active bank</b>
+            </p>
+            <p>
+                To prevent a single account from accumulating all the coins, requests
+                are made using a public facebook or twitter account.
+            </p>
+        </div>
+    </main>
+
+    <div class="using-tnb-section">
+        <h2>How to use TNB Faucet?</h2>
+        <div class="flex flex-wrap flex-center">
+            <div class="row">
+                <div class="steps">
+                    <img src="{% static 'tnbfaucet/assets/guide/tweet.webp' %}" class="steps-img1"
+                        alt="example post image" />
+                    <span class="step-title"><b>1. Post on Social Media</b></span>
+                    <ul>
+                        <li>Create a post on Facebook or Twitter</li>
+                        <li>Mention #TNBFaucet and thenewboston address</li>
+                    </ul>
+                </div>
+
+                <div class="steps">
+                    <img src="{% static 'tnbfaucet/assets/guide/step2.webp' %}" class="steps-img2" alt="account icon" />
+                    <span class="step-title"><b>2. Copy Post URL</b></span>
+                    <ul>
+                        <li>Make sure the Post is Public</li>
+                        <li>Copy the complete URL of the post</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="steps">
+                    <img src="{% static 'tnbfaucet/assets/guide/step3.webp' %}" class="steps-img2" alt="account icon" />
+
+                    <span class="step-title"><b>3. Open TNB Faucet & Paste URL</b></span>
+                    <ul>
+                        <li>Paste the URL</li>
+                        <li>Select the Number of coins you want</li>
+                        <li>Click on Collect coins</li>
+                    </ul>
+                </div>
+
+                <div class="steps">
+                    <img src="{% static 'tnbfaucet/assets/guide/step4.webp' %}" class="steps-img1" alt="account icon" />
+                    <span class="step-title"><b>4. Connect to TNB Testnet</b></span>
+                    <ul>
+                        <li>Open Account Manager / TNB wallet</li>
+                        <li>
+                            Use<a target="_blank" href="http://52.172.197.46">52.172.197.46</a>
+                            as your active bank
+                        </li>
+                        <li>Click on Collect coins</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex flex-center">
+        <div class="faq">
+            <h2>Frequently Asked Questions</h2>
+            <details class="faq-item">
+                <summary class="faq-summary">
+                    What is a TNBFaucet Testnet? <i class="fas"></i>
+                </summary>
+                <div class="faq-content">
+                    <p>
+                        Testnet is an alternative
+                        <a href="https:/thenewboston.com">thenewboston</a> network.
+                        TNBFaucet coins are separate and distinct from actual TNB coins
+                        and are never supposed to have any value.
+                    </p>
+                    <p>
+                        It is used for testing decentralised apps and smart contracts
+                        without spending real money.
+                    </p>
+                    It has the same properties as usual TNB coins:
+                    <ul>
+                        <li>You can use same account address</li>
+                        <li>You can transfer and receive it</li>
+                        <li>Test network behaves the same as mainnet</li>
+                    </ul>
+
+                    The main difference is that it has 0 value.
+                    <ul>
+                        <li>You cannot buy/sell it on any exchange</li>
+                        <li>Everyone can just get some for free</li>
+                        <li>Test network is much smaller in size</li>
+                    </ul>
+                </div>
+            </details>
+
+            <details class="faq-item">
+                <summary class="faq-summary fas">
+                    How do I start developing on the TNBFaucet testnet?
+                    <i class="fas"></i>
+                </summary>
+                <div class="faq-content">
+                    You would need to:
+
+                    <ul>
+                        <li>
+                            Connect to testnet by switching your active bank to
+                            <a href="">one of the testnet bank nodes.</a>
+                        </li>
+                        <li>
+                            Request some free testnet coins to your address by creating a
+                            social media post.
+                        </li>
+                        <li>
+                            Use testnet coins in your applications for testing/ development
+                            purposes
+                        </li>
+                    </ul>
+                </div>
+            </details>
+
+            <details class="faq-item">
+                <summary class="faq-summary">
+                    Why do I have to post on social media to collect free coins?
+                    <i class="fas"></i>
+                </summary>
+                <div class="faq-content">
+                    <p>
+                        To prevent a single account from accumulating all the coins,
+                        requests are made using a public facebook or twitter account.
+                    </p>
+                    <p>
+                        Social media posts also help spreading awareness about
+                        thenewboston and it is a great way for people to learn how
+                        everything works without losing real coins.
+                    </p>
+                </div>
+            </details>
+
+            <details class="faq-item">
+                <summary class="faq-summary fas">
+                    Will I receive coins every “x” hours?
+                    <i class="fas"></i>
+                </summary>
+                <div class="faq-content">
+                    <p>
+                        No, to receive more coins you would have to create new social
+                        media post. Every “x” hour is a limit to prevent accumulating all
+                        the coins by a single person. TNBFaucet provides a few options to
+                        receive testnet coins in different amount based upon your
+                        requirements, each having different limit in hours.
+                    </p>
+                </div>
+            </details>
+
+            <details class="faq-item">
+                <summary class="faq-summary fas">
+                    What is the difference between a mainnet and a testnet?
+                    <i class="fas"></i>
+                </summary>
+                <div class="faq-content">
+                    <p>
+                        The “mainnet” is what you are familiar with as a user - the
+                        instance of the blockchain where the cryptocurrency has value.
+                    </p>
+                    <p>
+                        While the “testnet” is essentially a developer playground - it is
+                        where new versions of the software get tested, and where people
+                        can write and test their apps without risking losing real money
+                    </p>
+                </div>
+            </details>
+
+            <details class="faq-item">
+                <summary class="faq-summary fas">
+                    Where can I find my account number? Is there any wallet for
+                    TNBFaucet?
+                    <i class="fas"></i>
+                </summary>
+
+                <div class="faq-content">
+                    <p>
+                        Any thenewboston wallet including official Account Manager desktop
+                        application can be used to connect to TNBFaucet as long as your
+                        active bank is one of <a href="">the testnet bank nodes </a>
+                    </p>
+
+                    <p>
+                        You can create new account the same way like you did for mainnet
+                        or use the existing one to receive free TNBFaucet coins.
+                    </p>
+                </div>
+            </details>
+
+            <details class="faq-item">
+                <summary class="faq-summary fas">
+                    Why don't people run apps on the testnet? I don't care about the
+                    "value" and it's free!?
+                    <i class="fas"></i>
+                </summary>
+
+                <div class="faq-content">
+                    <p>
+                        Without economic incentives, no banks/ validators would join
+                        testnet and the entirety of the blockchain security model fails.
+                        Therefore, the testnet is good to well, ‘test’ your applications
+                        at almost no cost, but is a terrible location to have your apps in
+                        production. This is why size and scale of testnet is much smaller.  
+                        Even the testnet coins do not hold any value, anyone with a social
+                        media account can collect them for free.
+                    </p>
+                </div>
+            </details>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -3,6 +3,17 @@ from .base import *
 
 SENTRY_DSN = os.getenv('SENTRY_DSN')
 
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('POSTGRES_DB', 'thenewboston'),
+        'USER': os.getenv('POSTGRES_USER', 'thenewboston'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'thenewboston'),
+        'HOST': os.getenv('POSTGRES_HOST', 'localhost'),
+        'PORT': os.getenv('POSTGRES_PORT', '5432')
+    }
+}
+
 if SENTRY_DSN:
     import sentry_sdk
     from sentry_sdk.integrations.celery import CeleryIntegration

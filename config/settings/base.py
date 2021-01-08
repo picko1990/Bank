@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     'v1.connection_requests.apps.ConnectionRequestsConfig',
     'v1.invalid_blocks.apps.InvalidBlocksConfig',
     'v1.self_configurations.apps.SelfConfigurationsConfig',
+    'v1.tnb_faucet.apps.FaucetConfig',
     'v1.validator_confirmation_services.apps.ValidatorConfirmationServicesConfig',
 
 ]
@@ -73,12 +74,8 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('POSTGRES_DB', 'thenewboston'),
-        'USER': os.getenv('POSTGRES_USER', 'thenewboston'),
-        'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'thenewboston'),
-        'HOST': os.getenv('POSTGRES_HOST', 'localhost'),
-        'PORT': os.getenv('POSTGRES_PORT', '5432')
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
 
@@ -104,7 +101,11 @@ USE_L10N = True
 USE_TZ = True
 
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
+# STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
+
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static')
+]
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
