@@ -2,7 +2,6 @@ from django.core.validators import MaxValueValidator
 from django.db import models
 from ...accounts.models.account import Account
 from thenewboston.constants.network import BALANCE_LOCK_LENGTH, MAX_POINT_VALUE, VERIFY_KEY_LENGTH
-from datetime import datetime, timedelta
 from django.core.validators import MinValueValidator, MaxValueValidator
 from thenewboston.constants.network import MIN_POINT_VALUE
 
@@ -19,7 +18,7 @@ class FaucetModel(models.Model):
         ]
     )
     created_at = models.DateTimeField(auto_now_add=True)
-    next_valid_access_time = models.DateTimeField(blank=False, default=datetime.now()+timedelta(hours=3))
+    next_valid_access_time = models.DateTimeField(blank=False)
     social_type = models.CharField(blank=False, max_length=8, choices=SOCIAL_TYPES)
 
     class Meta:
@@ -32,9 +31,9 @@ class FaucetModel(models.Model):
 
     def __str__(self):
         return (
-            f'To {self.account_number} '
+            f'To {self.account} '
             f'using {self.social_type} | '
-            f'@ {self.social_username} | '
+            f'@ {self.social_user_id} | '
         )
 
 class FaucetOption(models.Model):
