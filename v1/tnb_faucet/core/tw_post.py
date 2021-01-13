@@ -54,7 +54,7 @@ def process(tweet_url):
     if not endpoint.isnumeric():
         logger.error(f'Cannot determine tweet id for <{tweet_url}>')
         return
-        
+
     tweet_id = int(endpoint)
 
     headers = {

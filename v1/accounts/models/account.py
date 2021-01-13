@@ -19,9 +19,6 @@ class Account(CreatedModified):
         ]
     )
 
-    class Meta:
-        default_related_name = 'accounts'
-
     def __str__(self):
         return (
             f'Account Number: {self.account_number} | '
