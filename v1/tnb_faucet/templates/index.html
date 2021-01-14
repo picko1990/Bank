@@ -21,24 +21,35 @@
 
 <body>
     <header class="header">
-        <img src="{% static 'tnbfaucet/assets/icons/hologram.svg' %}" alt="logo" height="30px" />
+        <img src="{% static 'tnbfaucet/assets/icons/hologram.svg' %}" alt="open blockchain explorer logo" height="30px" />
         <h1 class="open-blockchain-explorer">Open Blockchain Explorer</h1>
     </header>
 
     <main class="cover">
         <h1 class="title">TNB Faucet</h1>
         <h2 class="free-coins-text">I WANT FREE TNB COINS</h2>
-
+        {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>
+                {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}Important: {% endif %}
+                {{ message }}
+            </li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        {% if form %}
         <form class="url-post-form" method="POST">
             {{ form.errors }}
             {% csrf_token %}
             <div class="input-group">
                 {{ form.amount }}
                 <input name="{{ form.url.name }}" type="url" id="{{ form.url.id_for_label }}"
-                    placeholder="URL of a facebook post or tweet containing your thenewboston address..." required />
+                    placeholder="URL of a tweet or facebook post containing your thenewboston address..." required />
             </div>
             <button type="submit">Collect coins</button>
         </form>
+        {% endif %}
 
         <div class="faucet-info">
             <p>
@@ -60,17 +71,27 @@
         <div class="flex flex-wrap flex-center">
             <div class="row">
                 <div class="steps">
-                    <img src="{% static 'tnbfaucet/assets/guide/tweet.webp' %}" class="steps-img1"
-                        alt="example post image" />
+                    <picture>
+                        <source type="image/webp" srcset="{% static 'tnbfaucet/assets/guide/tweet.webp' %}">
+                        <img src="{% static 'tnbfaucet/assets/guide/tweet.png' %}" class="steps-img1" alt="example post image">
+                    </picture>
                     <span class="step-title"><b>1. Post on Social Media</b></span>
                     <ul>
-                        <li>Create a post on Facebook or Twitter</li>
+                        <li>
+                            Create a post on Facebook or a
+                            <a href="https://twitter.com/intent/tweet?url=&text=Requesting%20faucet%20funds%20into%2022d0f0047b572a6acb6615f7aae646b0b96ddc58bfd54ed2775f885baeba3d6a%20on%20the%20%23TNBFaucet%20test%20network."
+                                target="_about:blank">tweet</a>
+                            on Twitter
+                        </li>
                         <li>Mention #TNBFaucet and thenewboston address</li>
                     </ul>
                 </div>
 
                 <div class="steps">
-                    <img src="{% static 'tnbfaucet/assets/guide/step2.webp' %}" class="steps-img2" alt="account icon" />
+                    <picture>
+                        <source type="image/webp" srcset="{% static 'tnbfaucet/assets/guide/step2.webp' %}">
+                        <img src="{% static 'tnbfaucet/assets/guide/step2.png' %}" class="steps-img2" alt="step 2 illustration">
+                    </picture>
                     <span class="step-title"><b>2. Copy Post URL</b></span>
                     <ul>
                         <li>Make sure the Post is Public</li>
@@ -81,8 +102,10 @@
 
             <div class="row">
                 <div class="steps">
-                    <img src="{% static 'tnbfaucet/assets/guide/step3.webp' %}" class="steps-img2" alt="account icon" />
-
+                    <picture>
+                        <source type="image/webp" srcset="{% static 'tnbfaucet/assets/guide/step3.webp' %}">
+                        <img src="{% static 'tnbfaucet/assets/guide/step3.png' %}" class="steps-img2" alt="step 3 illustration">
+                    </picture>
                     <span class="step-title"><b>3. Open TNB Faucet & Paste URL</b></span>
                     <ul>
                         <li>Paste the URL</li>
@@ -92,7 +115,10 @@
                 </div>
 
                 <div class="steps">
-                    <img src="{% static 'tnbfaucet/assets/guide/step4.webp' %}" class="steps-img1" alt="account icon" />
+                    <picture>
+                        <source type="image/webp" srcset="{% static 'tnbfaucet/assets/guide/step4.webp' %}">
+                        <img src="{% static 'tnbfaucet/assets/guide/step4.png' %}" class="steps-img1" alt="step 4 illustration">
+                    </picture>
                     <span class="step-title"><b>4. Connect to TNB Testnet</b></span>
                     <ul>
                         <li>Open Account Manager / TNB wallet</li>
@@ -154,6 +180,13 @@
                             Connect to testnet by switching your active bank to
                             <a href="">one of the testnet bank nodes.</a>
                         </li>
+                        <br />
+                        
+                        <picture>
+                            <source type="image/webp" srcset="{% static 'tnbfaucet/assets/faq/testnet_bank.webp' %}">
+                            <img src="{% static 'tnbfaucet/assets/faq/testnet_bank.png' %}" width="280px" class="steps-img1" alt="Add Testnet modal" style="border: 1px solid var(--border)">
+                        </picture>
+
                         <li>
                             Request some free testnet coins to your address by creating a
                             social media post.
@@ -252,7 +285,7 @@
                         testnet and the entirety of the blockchain security model fails.
                         Therefore, the testnet is good to well, ‘test’ your applications
                         at almost no cost, but is a terrible location to have your apps in
-                        production. This is why size and scale of testnet is much smaller.  
+                        production. This is why size and scale of testnet is much smaller.
                         Even the testnet coins do not hold any value, anyone with a social
                         media account can collect them for free.
                     </p>
