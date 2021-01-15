@@ -28,7 +28,7 @@ def process(fb_url):
     url = urlparse(post_url)
     params = parse_qs(url.query)
     path = url.path
-    if path[-1] == '/':
+    if path and path[-1] == '/':
         path = path[:-1]
     endpoint = path.split('/')[-1]
     if endpoint.isnumeric():
