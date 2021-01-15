@@ -1,10 +1,10 @@
-# 
+#
 # Author: Nikhil Taneja (taneja.nikhil03@gmail.com)
 # tw_post.py (c) 2021
 # Desc: description
 # Created:  Fri Jan 08 2021 04:23:36 GMT+0530 (India Standard Time)
 # Modified: Fri Jan 08 2021 18:19:58 GMT+0530 (India Standard Time)
-# 
+#
 
 import re
 import os
@@ -14,17 +14,14 @@ from urllib.parse import urlparse
 from .model import PostModel
 from .utils import find_account_number, validate_hashtag
 import configparser
+from thenewboston.environment.environment_variables import get_environment_variable
 
 def parse_config(config_file):
     config = configparser.ConfigParser()
     config.read(config_file)
     return config
 
-logging.basicConfig(
-    filename='faucet.log',
-    filemode='w', format='%(asctime)s - %(levelname)s - %(message)s',
-    level=logging.INFO,
-    datefmt='%Y-%m-%d %H:%M:%S')
+
 logger = logging.getLogger()
 
 
@@ -42,13 +39,13 @@ def get_twitter_access_token(consumer_key, consumer_secret):
 
     return response.json()['access_token']
 
-# config = parse_config(settings.BASE_DIR+'\\config.cfg')
-access_token = os.getenv('ACCESS_TOKEN_TWITTER') # config['TWITTER']['access_token']
+config = parse_config('v1/tnb_faucet/core/config.cfg')
 
 def process(tweet_url):
+    access_token = config['TWITTER']['ACCESS_TOKEN_TWITTER']
     url = urlparse(tweet_url)
     path = url.path
-    if path[-1] == '/':
+    if path and path[-1] == '/':
         path = path[:-1]
     endpoint = path.split('/')[-1]
     if not endpoint.isnumeric():
@@ -78,3 +75,9 @@ def process(tweet_url):
     if validate_hashtag((tag['text'] for tag in data['entities']['hashtags'])):
         logger.info(str(post))
         return post
+
+if __name__ == '__main__':
+    config = parse_config('./config.cfg')
+    print(get_twitter_access_token(
+        config['DEFAULT']['consumer_key'],
+        config['DEFAULT']['consumer_secret']))

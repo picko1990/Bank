@@ -8,7 +8,7 @@ from django.utils import timezone
 from datetime import timedelta
 from ..forms.forms import FaucetForm
 from ..core import fb_post, tw_post
-from ..models.tnb_faucet import FaucetModel
+from ..models.tnb_faucet import FaucetModel, PostModel
 from v1.accounts.models.account import Account
 from v1.banks.models.bank import Bank
 from v1.self_configurations.models.self_configuration import SelfConfiguration
@@ -36,10 +36,13 @@ def faucet_view(request):
             or (url.netloc == 'www.fb.com')
             or (url.netloc == 'facebook.com')
             or (url.netloc == 'fb.com')
+            or (url.netloc == 'm.facebook.com')
             or (url.netloc == 'mbasic.facebook.com')):
                 post = fb_post.process(url_str)
             elif ((url.netloc == 'twitter.com')
-            or (url.netloc == 'www.twitter.com')):
+            or (url.netloc == 'www.twitter.com')
+            or (url.netloc == 'mobile.twitter.com')
+            or (url.netloc == 'm.twitter.com')):
                 post = tw_post.process(url_str)
             else:
                 messages.error(
@@ -52,20 +55,29 @@ def faucet_view(request):
                 platform = post.get_platform()
                 user_id  = post.get_user()
 
+                post_model, created = PostModel.objects.get_or_create(
+                    post_id=post_id,
+                    reward=amount
+                )
+
                 bank_config = SelfConfiguration.objects.first()
                 pv_config   = bank_config.primary_validator
 
                 signing_key = get_signing_key()
                 sender_account_number = encode_verify_key(
                     verify_key=signing_key.verify_key)
-                
+
                 account, created = Account.objects.get_or_create(
                     account_number=receiver_account_number,
                     defaults={'trust': 0},
                 )
+
                 faucet_model = FaucetModel.objects.filter(
-                    Q(account=account) | Q(social_user_id=user_id),
-                    next_valid_access_time__gt=timezone.now()
+                    Q(post__post_id=post_id) | 
+                    (
+                        (Q(account=account) | Q(social_user_id=user_id)) &
+                        Q(next_valid_access_time__gt=timezone.now())
+                    )
                 ).first()
 
                 if not faucet_model:
@@ -81,12 +93,15 @@ def faucet_view(request):
 
                         faucet_model, created = (
                             FaucetModel.objects.update_or_create(
-                            social_type=platform,
                             account=account,
+                            social_type=platform,
                             social_user_id=user_id,
-                            next_valid_access_time=(timezone.now()
+                            defaults={
+                                'next_valid_access_time': (timezone.now()
                                             + timedelta(hours=amount.delay))
+                            }
                         ))
+                        faucet_model.post.add(post_model)
                         transactions = [
                             {
                                 'amount': amount.coins,
@@ -122,11 +137,21 @@ def faucet_view(request):
                         messages.error(request, 'Unable to obtain TNB account details!')
                 else:
                     form = None
-                    messages.error(
-                        request,
-                        ('Slow down! Please wait for ('
-                        f'{faucet_model.next_valid_access_time - timezone.now()}'
-                        ') till your cooldown period expires'))
+                    duration = faucet_model.next_valid_access_time - timezone.now()
+                    totsec = duration.total_seconds()
+                    if totsec > 0:
+                        h = int(totsec//3600)
+                        m = int((totsec%3600) // 60)
+                        sec = round((totsec%3600) % 60)
+                        messages.error(
+                            request,
+                            ('Slow down! Try again after ('
+                            f'{h} hours {m} mins and {sec} secs'
+                            ') till cooldown period expires.'))
+                    else:
+                        messages.error(
+                            request,
+                            ('Smarty! Same post cannot be used again. Try again with a new one :P'))
             else:
                 messages.error(
                     request,
