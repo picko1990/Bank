@@ -38,6 +38,8 @@ INSTALLED_APPS = [
     'v1.tnb_faucet.apps.FaucetConfig',
     'v1.validator_confirmation_services.apps.ValidatorConfirmationServicesConfig',
 
+    #Third party
+    'captcha',
 ]
 
 MIDDLEWARE = [
@@ -93,6 +95,9 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+RECAPTCHA_PUBLIC_KEY = os.getenv('RECAPTCHA_PUBLIC_KEY')
+RECAPTCHA_PRIVATE_KEY = os.getenv('RECAPTCHA_PRIVATE_KEY')
 
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
