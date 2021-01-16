@@ -65,14 +65,18 @@ def faucet_view(request):
                 account, created = Account.objects.get_or_create(
                     account_number=receiver_account_number,
                     defaults={'trust': 0})
-
-                post_model = PostModel.objects.filter(post_id=post_id).first()
+                post_model = None
                 faucet_model = None
-                if not post_model:
-                    faucet_model = FaucetModel.objects.filter(
-                        (Q(account=account) | Q(social_user_id=user_id)),
-                        next_valid_access_time__gt=timezone.now()
-                    ).latest('next_valid_access_time')
+                try:
+                    post_model = PostModel.objects.get(post_id=post_id)
+                except PostModel.DoesNotExist:
+                    try:
+                        faucet_model = FaucetModel.objects.filter(
+                            (Q(account=account) | Q(social_user_id=user_id)),
+                            next_valid_access_time__gt=timezone.now()
+                        ).latest('next_valid_access_time')
+                    except FaucetModel.DoesNotExist:
+                        pass
 
                 if not post_model or not faucet_model:
                     response = requests.get((
