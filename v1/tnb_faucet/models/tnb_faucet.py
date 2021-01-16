@@ -1,7 +1,10 @@
 from django.core.validators import MaxValueValidator
 from django.db import models
 from ...accounts.models.account import Account
-from thenewboston.constants.network import BALANCE_LOCK_LENGTH, MAX_POINT_VALUE, VERIFY_KEY_LENGTH
+from thenewboston.constants.network import (
+    BALANCE_LOCK_LENGTH,
+    MAX_POINT_VALUE,
+    VERIFY_KEY_LENGTH)
 from django.core.validators import MinValueValidator, MaxValueValidator
 from thenewboston.constants.network import MIN_POINT_VALUE
 
@@ -18,16 +21,54 @@ class FaucetOption(models.Model):
     modified_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return (
-            f'{self.coins} coins / {self.delay} hrs'
-        )
+        return f'{self.coins} coins / {self.delay} hrs'
 
-class PostModel(models.Model):
+class FaucetModel(models.Model):
     SOCIAL_TYPES = [
         ('Twitter', 'Twitter'),
         ('Facebook', 'Facebook')
     ]
 
+    account = models.ForeignKey(
+        Account,
+        blank=False,
+        on_delete=models.CASCADE
+    )
+    social_type = models.CharField(
+        blank=False,
+        max_length=8,
+        choices=SOCIAL_TYPES
+    )
+    social_user_id = models.PositiveBigIntegerField(
+        blank=False,
+        validators=[
+            MinValueValidator(MIN_POINT_VALUE),
+        ]
+    )
+    next_valid_access_time = models.DateTimeField(blank=False)
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        editable=False
+    )
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['next_valid_access_time']),
+            models.Index(fields=['account','social_user_id']),
+        ]
+        unique_together = [
+            ['social_user_id', 'account'],
+            ['social_type', 'account'],
+            ['social_type', 'social_user_id']
+        ]
+
+    def __str__(self):
+        return (
+            f'social_user<{self.social_type} : {self.social_user_id}> | '
+            f'account<{self.account}>'
+        )
+
+class PostModel(models.Model):
     post_id = models.PositiveBigIntegerField(
         blank=False,
         validators=[
@@ -40,41 +81,22 @@ class PostModel(models.Model):
         blank=True,
         null=True
     )
-    social_type = models.CharField(blank=False, max_length=8, choices=SOCIAL_TYPES)
+    social_user = models.ForeignKey(
+        FaucetModel,
+        blank=False,
+        on_delete=models.CASCADE
+    )
+    created_at = models.DateTimeField(auto_now_add=True, editable=False)
 
     class Meta:
-        unique_together = [['post_id', 'social_type']]
+        indexes = [
+            models.Index(fields=['post_id']),
+        ]
+        unique_together = [['post_id', 'social_user']]
 
     def __str__(self):
         return (
             f'Sent {self.reward.coins} coins '
-            f'via <{self.social_type}:{self.post_id}>'
-        )
-
-
-class FaucetModel(models.Model):
-    account = models.ForeignKey(Account, on_delete=models.CASCADE)
-    social_user_id = models.PositiveBigIntegerField(
-        blank=False,
-        validators=[
-            MinValueValidator(MIN_POINT_VALUE),
-        ]
-    )
-    created_at = models.DateTimeField(auto_now_add=True)
-    next_valid_access_time = models.DateTimeField(blank=False)
-    post = models.ManyToManyField(PostModel, blank=False, related_name="social_posts")
-
-
-    class Meta:
-        indexes = [
-            # models.Index(fields=['post']),
-            models.Index(fields=['next_valid_access_time']),
-            models.Index(fields=['account','social_user_id']),
-        ]
-        unique_together = [['social_user_id', 'account']]
-
-    def __str__(self):
-        return (
-            f'To {self.account} '
-            f'@ {self.social_user_id} | '
+            f'to <{self.user} | '
+            f'via {self.post_id}>'
         )
