@@ -15,7 +15,7 @@ class FaucetForm(forms.Form):
     url = forms.URLField(required=True,
                          widget=forms.TextInput
                          (attrs={
-                             ('placeholder': 'URL of a facebook post'
+                              'placeholder': ('URL of a facebook post'
                               ' or tweet containing your thenewboston'
                               ' address...')})
                          )
