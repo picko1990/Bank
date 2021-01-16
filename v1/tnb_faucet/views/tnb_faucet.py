@@ -81,11 +81,7 @@ def faucet_view(request):
 
             platform = get_platform(url_str)
             if platform:
-                messages.error(
-                    request,
-                    'Only facebook and twitter URL allowed!')
-
-                post = platform.process(url_str)
+                post = platform.process(url_str, amount)
 
                 if post:
                     receiver_account_number = post.get_account_number()
@@ -199,6 +195,10 @@ def faucet_view(request):
                          ' Make sure post is public,'
                          ' contains #TNBFaucet and your account number')
                     )
+            else:
+                messages.error(
+                    request,
+                    'Only facebook and twitter URL allowed!')
         else:
             messages.error(
                 request,
