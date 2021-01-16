@@ -64,8 +64,8 @@ class FaucetModel(models.Model):
 
     def __str__(self):
         return (
-            f'social_user<{self.social_type} : {self.social_user_id}> | '
-            f'account<{self.account}>'
+            f'<{self.social_type} : {self.social_user_id}> | '
+            f'<{self.account}>'
         )
 
 class PostModel(models.Model):
@@ -97,6 +97,6 @@ class PostModel(models.Model):
     def __str__(self):
         return (
             f'Sent {self.reward.coins} coins '
-            f'to <{self.user} | '
+            f'to <{self.social_user} | '
             f'via {self.post_id}>'
         )
