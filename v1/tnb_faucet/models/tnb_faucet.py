@@ -58,12 +58,12 @@ class FaucetModel(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     next_valid_access_time = models.DateTimeField(blank=False)
     social_type = models.CharField(blank=False, max_length=8, choices=SOCIAL_TYPES)
-    post = models.ManyToManyField(PostModel, blank=False, unique=True, related_name="Social Posts")
+    post = models.ManyToManyField(PostModel, blank=False, related_name="social_posts")
 
 
     class Meta:
         indexes = [
-            models.Index(fields=['post']),
+            # models.Index(fields=['post']),
             models.Index(fields=['next_valid_access_time']),
             models.Index(fields=['account','social_user_id']),
         ]
@@ -76,4 +76,3 @@ class FaucetModel(models.Model):
             f'using {self.social_type} | '
             f'@ {self.social_user_id} | '
         )
-
