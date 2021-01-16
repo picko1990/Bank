@@ -57,7 +57,8 @@ def faucet_view(request):
 
                 post_model, created = PostModel.objects.get_or_create(
                     post_id=post_id,
-                    reward=amount
+                    reward=amount,
+                    social_type=platform
                 )
 
                 bank_config = SelfConfiguration.objects.first()
@@ -94,7 +95,6 @@ def faucet_view(request):
                         faucet_model, created = (
                             FaucetModel.objects.update_or_create(
                             account=account,
-                            social_type=platform,
                             social_user_id=user_id,
                             defaults={
                                 'next_valid_access_time': (timezone.now()
@@ -102,6 +102,7 @@ def faucet_view(request):
                             }
                         ))
                         faucet_model.post.add(post_model)
+                        
                         transactions = [
                             {
                                 'amount': amount.coins,
