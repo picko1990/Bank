@@ -47,6 +47,7 @@
                 <input name="{{ form.url.name }}" type="url" id="{{ form.url.id_for_label }}"
                     placeholder="URL of a tweet or facebook post containing your thenewboston address..." required />
             </div>
+            {{ form.captcha }}
             <button type="submit">Collect coins</button>
         </form>
         {% endif %}
