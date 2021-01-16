@@ -74,7 +74,7 @@ def process(tweet_url, amount):
         return
     data = response.json()
     user_id = data['user']['id']
-    post = PostModel(tweet_id, amount.coins. amount.delay)
+    post = PostModel(tweet_id, amount.coins, amount.delay)
     post.set_platform('twitter')
     account_number = find_account_number(data['text'])
     if not account_number:

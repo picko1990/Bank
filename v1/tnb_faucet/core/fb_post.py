@@ -39,7 +39,7 @@ def process(fb_url, amount):
             logger.error('Cannot determine post id for <{fb_url}>')
             return
 
-    post = PostModel(post_id, amount.coins. amount.delay)
+    post = PostModel(post_id, amount.coins, amount.delay)
     post.set_platform('facebook')
 
     response = requests.get(post_url)
