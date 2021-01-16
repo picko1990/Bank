@@ -23,6 +23,11 @@ class FaucetOption(models.Model):
         )
 
 class PostModel(models.Model):
+    SOCIAL_TYPES = [
+        ('Twitter', 'Twitter'),
+        ('Facebook', 'Facebook')
+    ]
+
     post_id = models.PositiveBigIntegerField(
         blank=False,
         validators=[
@@ -35,19 +40,19 @@ class PostModel(models.Model):
         blank=True,
         null=True
     )
+    social_type = models.CharField(blank=False, max_length=8, choices=SOCIAL_TYPES)
+
+    class Meta:
+        unique_together = [['post_id', 'social_type']]
 
     def __str__(self):
         return (
             f'Sent {self.reward.coins} coins '
-            f'via {self.post_id}'
+            f'via <{self.social_type}:{self.post_id}>'
         )
 
 
 class FaucetModel(models.Model):
-    SOCIAL_TYPES = [
-        ('Twitter', 'Twitter'),
-        ('Facebook', 'Facebook')
-    ]
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
     social_user_id = models.PositiveBigIntegerField(
         blank=False,
@@ -57,7 +62,6 @@ class FaucetModel(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
     next_valid_access_time = models.DateTimeField(blank=False)
-    social_type = models.CharField(blank=False, max_length=8, choices=SOCIAL_TYPES)
     post = models.ManyToManyField(PostModel, blank=False, related_name="social_posts")
 
 
@@ -67,12 +71,10 @@ class FaucetModel(models.Model):
             models.Index(fields=['next_valid_access_time']),
             models.Index(fields=['account','social_user_id']),
         ]
-        unique_together = [['social_type', 'account']]
-        unique_together = [['social_type', 'social_user_id']]
+        unique_together = [['social_user_id', 'account']]
 
     def __str__(self):
         return (
             f'To {self.account} '
-            f'using {self.social_type} | '
             f'@ {self.social_user_id} | '
         )
