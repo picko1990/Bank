@@ -55,12 +55,6 @@ def faucet_view(request):
                 platform = post.get_platform()
                 user_id  = post.get_user()
 
-                post_model, created = PostModel.objects.get_or_create(
-                    post_id=post_id,
-                    reward=amount,
-                    social_type=platform
-                )
-
                 bank_config = SelfConfiguration.objects.first()
                 pv_config   = bank_config.primary_validator
 
@@ -82,6 +76,12 @@ def faucet_view(request):
                 ).first()
 
                 if not faucet_model:
+                    post_model, created = PostModel.objects.get_or_create(
+                        post_id=post_id,
+                        reward=amount,
+                        social_type=platform
+                    )
+
                     response = requests.get((
                         f'{pv_config.protocol}://{pv_config.ip_address}'
                         f':{pv_config.port}'f'/accounts/'
@@ -102,7 +102,7 @@ def faucet_view(request):
                             }
                         ))
                         faucet_model.post.add(post_model)
-                        
+
                         transactions = [
                             {
                                 'amount': amount.coins,
