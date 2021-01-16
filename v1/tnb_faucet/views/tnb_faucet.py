@@ -146,10 +146,10 @@ def faucet_view(request):
                         )
                 else:
                     form = None
-                    duration = (faucet_model.next_valid_access_time
-                                - timezone.now())
-                    totsec = duration.total_seconds()
-                    if totsec > 0:
+                    if faucet_model:
+                        duration = (faucet_model.next_valid_access_time
+                                    - timezone.now())
+                        totsec = duration.total_seconds()
                         h = int(totsec // 3600)
                         m = int((totsec % 3600) // 60)
                         sec = round((totsec % 3600) % 60)
@@ -162,7 +162,7 @@ def faucet_view(request):
                     else:
                         messages.error(
                             request,
-                            ('Same post cannot be used again. '
+                            ('Same post cannot be used again! '
                              ' Try again with a new one :P')
                         )
             else:
