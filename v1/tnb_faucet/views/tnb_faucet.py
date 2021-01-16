@@ -37,20 +37,15 @@ def get_platform(url_str: str):
     return platform
 
 
-def validate_post_exists_or_delay(account_number: str, post_id: int, user_id: int):
-    """Enforcing rules before releasing coins
-
-    Rules:
-        Same post cannot be used again
-        Next valid access time for an account should be less than current time
+def validate_post_exists(account_number: str, post_id: int):
+    """Same post cannot be used again
 
     Args:
         account_number (str): TNB public key
         post_id (int): Id of a specific tweet or fb post
-        user_id (int): Id of a specific twitter or fb user
 
     Returns:
-        False: If post_id already exists or next_valid_access_time > timezone.now()
+        False: If post_id already exists
         account: Account object in the else case
     """
     account, created = Account.objects.get_or_create(
@@ -60,14 +55,28 @@ def validate_post_exists_or_delay(account_number: str, post_id: int, user_id: in
         PostModel.objects.get(post_id=post_id)
         return False
     except PostModel.DoesNotExist:
-        try:
-            FaucetModel.objects.filter(
-                (Q(account=account) | Q(social_user_id=user_id)),
-                next_valid_access_time__gt=timezone.now()
-            ).latest('next_valid_access_time')
-            return False
-        except FaucetModel.DoesNotExist:
-            return account
+        return account
+
+
+def validate_expiry(account: Account, user_id: int):
+    """Next valid access time for an account should be less than current time
+
+    Args:
+        account (Account): Account object
+        user_id (int): Id of a specific twitter or fb user
+
+    Returns:
+        FaucetModel: If next_valid_access_time > timezone.now()
+        False: Else
+    """
+    try:
+        faucet_model = FaucetModel.objects.filter(
+            (Q(account=account) | Q(social_user_id=user_id)),
+            next_valid_access_time__gt=timezone.now()
+        ).latest('next_valid_access_time')
+        return faucet_model
+    except FaucetModel.DoesNotExist:
+        return False
 
 
 def faucet_view(request):
@@ -96,12 +105,13 @@ def faucet_view(request):
                     sender_account_number = encode_verify_key(
                         verify_key=signing_key.verify_key)
 
-                    account = validate_post_exists_or_delay(
+                    account = validate_post_exists(
                         receiver_account_number,
-                        post_id,
-                        user_id
+                        post_id
                     )
-                    if account:
+                    faucet_model = validate_expiry(account, user_id)
+
+                    if account and not faucet_model:
                         response = requests.get((
                             f'{pv_config.protocol}://{pv_config.ip_address}'
                             f':{pv_config.port}'f'/accounts/'
@@ -169,10 +179,10 @@ def faucet_view(request):
                             )
                     else:
                         form = None
-                        duration = (faucet_model.next_valid_access_time
-                                    - timezone.now())
-                        totsec = duration.total_seconds()
-                        if totsec > 0:
+                        if faucet_model:
+                            duration = (faucet_model.next_valid_access_time
+                                        - timezone.now())
+                            totsec = duration.total_seconds()
                             h = int(totsec // 3600)
                             m = int((totsec % 3600) // 60)
                             sec = round((totsec % 3600) % 60)
