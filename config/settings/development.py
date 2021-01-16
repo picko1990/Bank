@@ -2,6 +2,7 @@ import iptools
 
 from .base import *
 
+SECRET_KEY = 'somesecret'
 DEBUG = True
 
 INTERNAL_IPS = iptools.IpRangeList(

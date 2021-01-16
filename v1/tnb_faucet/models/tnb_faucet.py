@@ -1,19 +1,16 @@
-from django.core.validators import MaxValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-from ...accounts.models.account import Account
-from thenewboston.constants.network import (
-    BALANCE_LOCK_LENGTH,
-    MAX_POINT_VALUE,
-    VERIFY_KEY_LENGTH)
-from django.core.validators import MinValueValidator, MaxValueValidator
 from thenewboston.constants.network import MIN_POINT_VALUE
+
+from v1.accounts.models.account import Account
+
 
 class FaucetOption(models.Model):
     coins = models.PositiveIntegerField(blank=False)
     delay = models.PositiveSmallIntegerField(
         blank=False,
         validators=[
-            MaxValueValidator(30*24),
+            MaxValueValidator(30 * 24),
             MinValueValidator(1),
         ]
     )
@@ -22,6 +19,7 @@ class FaucetOption(models.Model):
 
     def __str__(self):
         return f'{self.coins} coins / {self.delay} hrs'
+
 
 class FaucetModel(models.Model):
     SOCIAL_TYPES = [
@@ -54,7 +52,7 @@ class FaucetModel(models.Model):
     class Meta:
         indexes = [
             models.Index(fields=['next_valid_access_time']),
-            models.Index(fields=['account','social_user_id']),
+            models.Index(fields=['account', 'social_user_id']),
         ]
         unique_together = [
             ['social_user_id', 'account'],
@@ -67,6 +65,7 @@ class FaucetModel(models.Model):
             f'<{self.social_type} : {self.social_user_id}> | '
             f'<{self.account}>'
         )
+
 
 class PostModel(models.Model):
     post_id = models.PositiveBigIntegerField(

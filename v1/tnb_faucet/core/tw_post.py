@@ -6,23 +6,22 @@
 # Modified: Fri Jan 08 2021 18:19:58 GMT+0530 (India Standard Time)
 #
 
-import re
-import os
-import requests
+import configparser
 import logging
 from urllib.parse import urlparse
+
+import requests
+
 from .model import PostModel
 from .utils import find_account_number, validate_hashtag
-import configparser
-from thenewboston.environment.environment_variables import get_environment_variable
+
+logger = logging.getLogger('thenewboston')
+
 
 def parse_config(config_file):
     config = configparser.ConfigParser()
     config.read(config_file)
     return config
-
-
-logger = logging.getLogger()
 
 
 def get_twitter_access_token(consumer_key, consumer_secret):
@@ -32,16 +31,22 @@ def get_twitter_access_token(consumer_key, consumer_secret):
         'grant_type': 'client_credentials'
     }
 
-    response = requests.post(url, data=data, auth=(consumer_key, consumer_secret))
+    response = requests.post(
+        url, data=data,
+        auth=(consumer_key, consumer_secret))
     if response.status_code != 200:
-        logger.error(f'Failed to authenticate <{response.status_code}> <Error:{response.text}>')
+        logger.error((
+            'Failed to authenticate '
+            f'<{response.status_code}> <Error:{response.text}>'))
         return None
 
     return response.json()['access_token']
 
+
 config = parse_config('v1/tnb_faucet/core/config.cfg')
 
-def process(tweet_url):
+
+def process(tweet_url, amount):
     access_token = config['TWITTER']['ACCESS_TOKEN_TWITTER']
     url = urlparse(tweet_url)
     path = url.path
@@ -59,22 +64,30 @@ def process(tweet_url):
     }
     params = (('id', tweet_id),)
 
-    response = requests.get('https://api.twitter.com/1.1/statuses/show.json', headers=headers, params=params)
+    response = requests.get(
+        'https://api.twitter.com/1.1/statuses/show.json',
+        headers=headers, params=params)
     if response.status_code != 200:
-        logger.error(f'Cannot find tweet of id <{tweet_id}> <Error:{response.text}>')
+        logger.error((
+            'Cannot find tweet of id '
+            f'<{tweet_id}> <Error:{response.text}>'))
         return
     data = response.json()
-    post = PostModel(tweet_id)
+    user_id = data['user']['id']
+    post = PostModel(tweet_id, amount.coins. amount.delay)
     post.set_platform('twitter')
     account_number = find_account_number(data['text'])
     if not account_number:
-        logger.error('Invalid account number for <User:{user_id}> via <Facebook:{tweet_id}>')
+        logger.error(('Invalid account number for '
+                      f'<User:{user_id}> via <Facebook:{tweet_id}>'))
         return
     post.set_account_number(account_number)
-    post.set_user(data['user']['id'])
-    if validate_hashtag((tag['text'] for tag in data['entities']['hashtags'])):
-        logger.info(str(post))
+    post.set_user(user_id)
+    if validate_hashtag(
+            (tag['text'] for tag in data['entities']['hashtags'])):
+        logger.debug(str(post))
         return post
+
 
 if __name__ == '__main__':
     config = parse_config('./config.cfg')
