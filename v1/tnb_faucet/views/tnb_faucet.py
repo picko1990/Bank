@@ -78,7 +78,7 @@ def faucet_view(request):
                     except FaucetModel.DoesNotExist:
                         pass
 
-                if not post_model or not faucet_model:
+                if not post_model and not faucet_model:
                     response = requests.get((
                         f'{pv_config.protocol}://{pv_config.ip_address}'
                         f':{pv_config.port}'f'/accounts/'
