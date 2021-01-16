@@ -169,10 +169,10 @@ def faucet_view(request):
                             )
                     else:
                         form = None
-                        if faucet_model:
-                            duration = (faucet_model.next_valid_access_time
-                                        - timezone.now())
-                            totsec = duration.total_seconds()
+                        duration = (faucet_model.next_valid_access_time
+                                    - timezone.now())
+                        totsec = duration.total_seconds()
+                        if totsec > 0:
                             h = int(totsec // 3600)
                             m = int((totsec % 3600) // 60)
                             sec = round((totsec % 3600) % 60)
