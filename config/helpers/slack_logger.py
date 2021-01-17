@@ -24,10 +24,7 @@ class SlackExceptionHandler(AdminEmailHandler):
                 record.getMessage()
             )
         except Exception:
-            subject = '%s: %s' % (
-                record.levelname,
-                record.getMessage()
-            )
+            subject = record.getMessage()
             request = None
         subject = self.format_subject(subject)
 
@@ -100,9 +97,9 @@ class SlackExceptionHandler(AdminEmailHandler):
         #                 'short': False,
         #             }
         #         ],
-            },
+        #     },
 
-        ]
+        # ]
         # if record.levelname == 'ERROR':
         #     extra_data = [
         #         'frames',
