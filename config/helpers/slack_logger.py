@@ -51,10 +51,15 @@ class SlackExceptionHandler(AdminEmailHandler):
         # this is where original 'emit' method code ends
 
         # construct slack attachment detail fields
+        colors = {
+            'ERROR': 'danger',
+            'INFO': 'good',
+            'WARNING': 'warning'
+        }
         attachments = [
             {
                 'title': subject,
-                'color': 'danger',
+                'color': colors.get(record.levelname, '#1d9bd1'),
                 'fields': [
                     {
                         'title': 'Level',
@@ -98,50 +103,50 @@ class SlackExceptionHandler(AdminEmailHandler):
             },
 
         ]
+        if record.levelname == 'ERROR':
+            extra_data = [
+                'frames',
+                'request_meta',
+                'filtered_POST_items',
+                'template_info',
+                'template_does_not_exist',
+                'postmortem'
+            ]
 
-        extra_data = [
-            'frames',
-            'request_meta',
-            'filtered_POST_items',
-            'template_info',
-            'template_does_not_exist',
-            'postmortem'
-        ]
+            # slack message attachment text has max of 8000 bytes
+            # lets split it up into 7900 bytes long chunks to be on the safe side
+            split = 7900
+            byte_size = 0
+            response = ''
+            part = 1
 
-        # slack message attachment text has max of 8000 bytes
-        # lets split it up into 7900 bytes long chunks to be on the safe side
-        split = 7900
-        byte_size = 0
-        response = ''
-        part = 1
+            for field in extra_data:
+                data = json.dumps(message[field], indent=2, default=str)
+                byte_size += len(data) + len(field) + len(data) + 3
+                if byte_size < split:
+                    response += f'{field}:\n{data}\n'
+                else:
+                    # add main error message body
+                    attachments.append({
+                        'color': 'danger',
+                        'title': f'Extra details ({part})',
+                        'text': response,
+                        'ts': time.time(),
+                    })
 
-        for field in extra_data:
-            data = json.dumps(message[field], indent=2, default=str)
-            byte_size += len(data) + len(field) + len(data) + 3
-            if byte_size < split:
-                response += f'{field}:\n{data}\n'
-            else:
-                # add main error message body
-                attachments.append({
-                    'color': 'danger',
-                    'title': f'Extra details ({part})',
-                    'text': response,
-                    'ts': time.time(),
-                })
-
-                part += 1
-                byte_size = len(data) + len(field) + len(data) + 3
-                response = f'{field}:\n{data}\n'
-        # add main error message body
-        attachments.append({
-            'color': 'danger',
-            'title': f'Extra details ({part})',
-            'text': response,
-            'ts': time.time(),
-        })
+                    part += 1
+                    byte_size = len(data) + len(field) + len(data) + 3
+                    response = f'{field}:\n{data}\n'
+            # add main error message body
+            attachments.append({
+                'color': 'danger',
+                'title': f'Extra details ({part})',
+                'text': response,
+                'ts': time.time(),
+            })
 
         # construct main text
-        main_text = 'Error at ' + time.strftime('%A, %d %b %Y %H:%M:%S +0000', time.gmtime())
+        main_text = 'Alert at ' + time.strftime('%A, %d %b %Y %H:%M:%S +0000', time.gmtime())
 
         # construct data
         data = {
