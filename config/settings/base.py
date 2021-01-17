@@ -164,7 +164,6 @@ LOGGING = {
         },
         'slack_admins': {
             'level': 'INFO',
-            'filters': ['require_debug_false'],
             'class': 'config.helpers.slack_logger.SlackExceptionHandler',
         },
     },
