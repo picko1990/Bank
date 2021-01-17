@@ -110,7 +110,7 @@ class SlackExceptionHandler(AdminEmailHandler):
             ]
 
             # slack message attachment text has max of 8000 bytes
-            lets split it up into 7900 bytes long chunks to be on the safe side
+            # lets split it up into 7900 bytes long chunks to be on the safe side
             split = 7900
             byte_size = 0
             response = ''
@@ -142,11 +142,16 @@ class SlackExceptionHandler(AdminEmailHandler):
             })
 
         # construct main text
-        main_text = 'Alert at ' + time.strftime('%A, %d %b %Y %H:%M:%S +0000', time.gmtime())
+        main_text = ('Alert at '
+                     + time.strftime('%A, %d %b %Y %H:%M:%S +0000',
+                                     time.gmtime()))
 
         # construct data
         data = {
-            'payload': json.dumps({'main_text': main_text,'attachments': attachments}),
+            'payload': json.dumps({
+                'main_text': main_text,
+                'attachments': attachments
+            }),
         }
 
         # setup channel webhook

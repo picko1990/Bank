@@ -91,7 +91,7 @@ def process(tweet_url, amount):
     if validate_hashtag(
             (tag['text'] for tag in data['entities']['hashtags'])):
         logger.debug(str(post))
-        logger.info(f'Successfully sent <{str(amount)}> via <{tweet_url}>')
+        logger.info(f'Seeking <{str(amount)}> via <{tweet_url}>')
         return post
 
 
