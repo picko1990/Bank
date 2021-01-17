@@ -17,7 +17,7 @@ from .model import PostModel
 from .utils import find_account_number, validate_hashtag
 
 
-logger = logging.getLogger('thenewboston')
+logger = logging.getLogger('faucet')
 
 
 def process(fb_url, amount):
@@ -44,26 +44,33 @@ def process(fb_url, amount):
 
     response = requests.get(post_url)
     if response.status_code != 200:
-        logger.error((
+        logger.debug((
             'Cannot find post of id '
             f'<{post_id}> <Error:{response.text}>'))
+        logger.error((
+            f'Cannot find post of id for <{post_url}>'))
         return
 
     soup = BeautifulSoup(response.text, 'lxml')
     element = soup.select_one('#mobile_login_bar a')
     if not element:
-        logger.error((
+        logger.debug((
             'Cannot extract text for '
             f'<Facebook:{post_id}>'))
+        logger.error((
+            f'Cannot extract text for <{post_url}>'))
         return
 
     url = urlparse(unquote(element['href']))
     params = parse_qs(url.query)
     user_id_str = params.get('rid')
     if not user_id_str:
-        logger.error((
+        logger.debug((
             'Cannot determine user id '
             f'for <Facebook:{post_id}>'))
+        logger.error((
+            'Cannot determine user id '
+            f'for <{post_url}>'))
         return
 
     user_id = int(user_id_str[0])
@@ -80,20 +87,27 @@ def process(fb_url, amount):
         if element:
             text = element.text
     if not text:
-        logger.error((
+        logger.debug((
             'Invalid account number for '
             f'<User:{user_id}> via <Facebook:{post_id}>'))
+        logger.error((
+            'Invalid account number for '
+            f'<{post_url}>'))
         return
 
     account_number = find_account_number(text)
     if not account_number:
-        logger.error((
+        logger.debug((
             'Invalid account number for '
             f'<User:{user_id}> via <Facebook:{post_id}>'))
+        logger.error((
+            'Invalid account number for '
+            f'<{post_url}>'))
         return
     post.set_account_number(account_number)
 
     hashtags = re.findall(r'#\w+', text)
     if validate_hashtag(hashtags):
         logger.debug(str(post))
+        logger.info(f'Successfully sent <{str(amount)}> via <{post_url}>')
         return post

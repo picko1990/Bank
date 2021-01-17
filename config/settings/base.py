@@ -157,13 +157,31 @@ LOGGING = {
             'formatter': 'verbose',
             'level': 'WARNING',
         },
+        'debug.handler': {
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(LOGS_DIR, 'debug.log'),
+            'formatter': 'verbose',
+            'level': 'DEBUG',
+        },
+        'slack_admins': {
+            'level': 'INFO',
+            'filters': ['require_debug_false'],
+            'class': 'config.helpers.slack_logger.SlackExceptionHandler',
+        },
     },
     'loggers': {
         'thenewboston': {
-            'handlers': ['error.handler', 'warning.handler'],
+            'handlers': ['error.handler', 'warning.handler', 'slack_admins'],
             'level': 'WARNING',
             'propagate': True,
         },
+        'faucet': {
+            'handlers': [
+                'error.handler', 'warning.handler',
+                'debug.handler', 'slack_admins'],
+            'level': 'DEBUG',
+            'propagate': True,
+        }
     },
     'version': 1,
 }

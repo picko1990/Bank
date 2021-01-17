@@ -9,7 +9,7 @@
 import logging
 
 
-logger = logging.getLogger('thenewboston')
+logger = logging.getLogger('faucet')
 
 
 class PostModel:

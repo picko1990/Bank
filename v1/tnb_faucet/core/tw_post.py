@@ -15,7 +15,7 @@ import requests
 from .model import PostModel
 from .utils import find_account_number, validate_hashtag
 
-logger = logging.getLogger('thenewboston')
+logger = logging.getLogger('faucet')
 
 
 def parse_config(config_file):
@@ -35,9 +35,11 @@ def get_twitter_access_token(consumer_key, consumer_secret):
         url, data=data,
         auth=(consumer_key, consumer_secret))
     if response.status_code != 200:
-        logger.error((
+        logger.debug((
             'Failed to authenticate '
             f'<{response.status_code}> <Error:{response.text}>'))
+        logger.error((
+            f'Failed to authenticate <{response.status_code}>'))
         return None
 
     return response.json()['access_token']
@@ -68,9 +70,11 @@ def process(tweet_url, amount):
         'https://api.twitter.com/1.1/statuses/show.json',
         headers=headers, params=params)
     if response.status_code != 200:
-        logger.error((
+        logger.debug((
             'Cannot find tweet of id '
             f'<{tweet_id}> <Error:{response.text}>'))
+        logger.error((
+            f'Cannot find tweet of id for <{tweet_url}>'))
         return
     data = response.json()
     user_id = data['user']['id']
@@ -78,14 +82,16 @@ def process(tweet_url, amount):
     post.set_platform('twitter')
     account_number = find_account_number(data['text'])
     if not account_number:
-        logger.error(('Invalid account number for '
-                      f'<User:{user_id}> via <Facebook:{tweet_id}>'))
+        logger.debug(('Invalid account number for '
+                      f'<User:{user_id}> via <Twitter:{tweet_id}>'))
+        logger.error(f'Invalid account number for <{tweet_url}>')
         return
     post.set_account_number(account_number)
     post.set_user(user_id)
     if validate_hashtag(
             (tag['text'] for tag in data['entities']['hashtags'])):
         logger.debug(str(post))
+        logger.info(f'Successfully sent <{str(amount)}> via <{tweet_url}>')
         return post
 
 
