@@ -163,21 +163,30 @@ LOGGING = {
             'formatter': 'verbose',
             'level': 'DEBUG',
         },
-        'slack_admins': {
+        'basic_slack_admins': {
             'level': 'INFO',
+            'class': 'config.helpers.basic_slack_logger.SlackExceptionHandler',
+        },
+        'slack_admins': {
+            'level': 'ERROR',
             'class': 'config.helpers.slack_logger.SlackExceptionHandler',
         },
     },
     'loggers': {
+        'django.request': {
+            'handlers': ['slack_admins'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
         'thenewboston': {
-            'handlers': ['error.handler', 'warning.handler', 'slack_admins'],
+            'handlers': ['error.handler', 'warning.handler', 'basic_slack_admins'],
             'level': 'WARNING',
             'propagate': True,
         },
         'faucet': {
             'handlers': [
                 'error.handler', 'warning.handler',
-                'debug.handler', 'slack_admins'],
+                'debug.handler', 'basic_slack_admins'],
             'level': 'DEBUG',
             'propagate': True,
         }
