@@ -140,6 +140,14 @@ class SlackExceptionHandler(AdminEmailHandler):
             'ts': time.time(),
         })
 
+        # construct main text
+        main_text = 'Error at ' + time.strftime('%A, %d %b %Y %H:%M:%S +0000', time.gmtime())
+
+        # construct data
+        data = {
+            'payload': json.dumps({'main_text': main_text, 'attachments': attachments}),
+        }
+
         # setup channel webhook
         webhook_url = os.getenv('SLACK_WEBHOOK')
 
