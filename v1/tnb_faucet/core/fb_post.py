@@ -109,5 +109,5 @@ def process(fb_url, amount):
     hashtags = re.findall(r'#\w+', text)
     if validate_hashtag(hashtags):
         logger.debug(str(post))
-        logger.info(f'Successfully sent <{str(amount)}> via <{post_url}>')
+        logger.info(f'Seeking <{str(amount)}> via <{post_url}>')
         return post
