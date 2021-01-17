@@ -36,7 +36,7 @@ def process(fb_url, amount):
         if endpoint:
             post_id = int(endpoint[0])
         else:
-            logger.error('Cannot determine post id for <{fb_url}>')
+            logger.error(f'Cannot determine post id for <{fb_url}>')
             return
 
     post = PostModel(post_id, amount.coins, amount.delay)

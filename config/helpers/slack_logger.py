@@ -1,5 +1,4 @@
 import json
-import math
 import os
 import time
 from copy import copy
@@ -44,8 +43,8 @@ class SlackExceptionHandler(AdminEmailHandler):
             exc_info = (None, record.getMessage(), None)
 
         reporter = ExceptionReporter(request, is_email=True, *exc_info)
-        message = '%s\n\n%s' % (self.format(no_exc_record), reporter.get_traceback_text())
-        # html_message = reporter.get_traceback_html() if self.include_html else None
+        message = reporter.get_traceback_data()
+        # message = '%s\n\n%s' % (self.format(no_exc_record), reporter.get_traceback_text())
 
         # self.send_mail(subject, message, fail_silently=True, html_message=html_message)
 
@@ -81,7 +80,7 @@ class SlackExceptionHandler(AdminEmailHandler):
                     },
                     {
                         'title': 'Status Code',
-                        'value': record.status_code,
+                        'value': getattr(record, 'status_code', None),
                         'short': True,
                     },
                     {
@@ -94,48 +93,52 @@ class SlackExceptionHandler(AdminEmailHandler):
                         'title': 'GET Params',
                         'value': json.dumps(request.GET) if request else 'No Request',
                         'short': False,
-                    },
-                    {
-                        'title': 'POST Data',
-                        'value': json.dumps(request.POST) if request else 'No Request',
-                        'short': False,
-                    },
+                    }
                 ],
             },
 
         ]
 
-        # add main error message body
+        extra_data = [
+            'frames',
+            'request_meta',
+            'filtered_POST_items',
+            'template_info',
+            'template_does_not_exist',
+            'postmortem'
+        ]
 
         # slack message attachment text has max of 8000 bytes
         # lets split it up into 7900 bytes long chunks to be on the safe side
-
         split = 7900
-        parts = range(math.ceil(len(message.encode('utf8')) / split))
+        byte_size = 0
+        response = ''
+        part = 1
 
-        for part in parts:
+        for field in extra_data:
+            data = json.dumps(message[field], indent=2, default=str)
+            byte_size += len(data) + len(field) + len(data) + 3
+            if byte_size < split:
+                response += f'{field}:\n{data}\n'
+            else:
+                # add main error message body
+                attachments.append({
+                    'color': 'danger',
+                    'title': f'Extra details ({part})',
+                    'text': response,
+                    'ts': time.time(),
+                })
 
-            start = 0 if part == 0 else split * part
-            end = split if part == 0 else split * part + split
-
-            # combine final text and prepend it with line breaks
-            # so the details in slack message will fully collapse
-            detail_text = '\r\n\r\n\r\n\r\n\r\n\r\n\r\n' + message[start:end]
-
-            attachments.append({
-                'color': 'danger',
-                'title': 'Details (Part {})'.format(part + 1),
-                'text': detail_text,
-                'ts': time.time(),
-            })
-
-        # construct main text
-        main_text = 'Error at ' + time.strftime('%A, %d %b %Y %H:%M:%S +0000', time.gmtime())
-
-        # construct data
-        data = {
-            'payload': json.dumps({'main_text': main_text, 'attachments': attachments}),
-        }
+                part += 1
+                byte_size = len(data) + len(field) + len(data) + 3
+                response = f'{field}:\n{data}\n'
+        # add main error message body
+        attachments.append({
+            'color': 'danger',
+            'title': f'Extra details ({part})',
+            'text': response,
+            'ts': time.time(),
+        })
 
         # setup channel webhook
         webhook_url = os.getenv('SLACK_WEBHOOK')
