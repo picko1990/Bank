@@ -98,6 +98,7 @@ urllib3==1.26.2           # via requests, sentry-sdk
 vine==1.3.0               # via amqp, celery
 wheel==0.35.1             # via thenewboston
 zope.interface==5.2.0     # via twisted
+django-recaptcha          # via thenewboston
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
