@@ -5,6 +5,10 @@ from .base import *
 SECRET_KEY = 'somesecret'
 DEBUG = True
 
+STATICFILES_DIRS = [
+   os.path.join(BASE_DIR, 'static')
+]
+
 INTERNAL_IPS = iptools.IpRangeList(
     '10/8',
     '127/8',

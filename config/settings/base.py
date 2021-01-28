@@ -106,11 +106,6 @@ USE_L10N = True
 USE_TZ = True
 
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
-
-# STATICFILES_DIRS = [
-#    os.path.join(BASE_DIR, 'static')
-# ]
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
@@ -132,66 +127,6 @@ CACHES = {
     }
 }
 
-LOGGING = {
-    'disable_existing_loggers': False,
-    'formatters': {
-        'verbose': {
-            'format': '{levelname} {asctime} {module} {message}',
-            'style': '{',
-        },
-    },
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-        },
-        'error.handler': {
-            'class': 'logging.FileHandler',
-            'filename': os.path.join(LOGS_DIR, 'error.log'),
-            'formatter': 'verbose',
-            'level': 'ERROR',
-        },
-        'warning.handler': {
-            'class': 'logging.FileHandler',
-            'filename': os.path.join(LOGS_DIR, 'warning.log'),
-            'formatter': 'verbose',
-            'level': 'WARNING',
-        },
-        'debug.handler': {
-            'class': 'logging.FileHandler',
-            'filename': os.path.join(LOGS_DIR, 'debug.log'),
-            'formatter': 'verbose',
-            'level': 'DEBUG',
-        },
-        'basic_slack_admins': {
-            'level': 'INFO',
-            'class': 'config.helpers.basic_slack_logger.SlackExceptionHandler',
-        },
-        'slack_admins': {
-            'level': 'ERROR',
-            'class': 'config.helpers.slack_logger.SlackExceptionHandler',
-        },
-    },
-    'loggers': {
-        'django.request': {
-            'handlers': ['slack_admins'],
-            'level': 'ERROR',
-            'propagate': False,
-        },
-        'thenewboston': {
-            'handlers': ['error.handler', 'warning.handler', 'basic_slack_admins'],
-            'level': 'WARNING',
-            'propagate': True,
-        },
-        'faucet': {
-            'handlers': [
-                'error.handler', 'warning.handler',
-                'debug.handler', 'basic_slack_admins'],
-            'level': 'DEBUG',
-            'propagate': True,
-        }
-    },
-    'version': 1,
-}
 
 CORS_ORIGIN_ALLOW_ALL = True
 
