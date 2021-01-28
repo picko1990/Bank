@@ -171,14 +171,14 @@ def faucet_view(request):
                                 request,
                                 (f'SUCCESS! {amount.coins} faucet funds'
                                  f' transferred to {receiver_account_number}.'))
-                            form = None
+                            form = FaucetForm()
                         else:
                             messages.error(
                                 request,
                                 'Unable to obtain TNB account details!'
                             )
                     else:
-                        form = None
+                        form = FaucetForm()
                         if faucet_model:
                             duration = (faucet_model.next_valid_access_time
                                         - timezone.now())

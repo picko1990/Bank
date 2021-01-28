@@ -21,23 +21,28 @@
 
 <body>
     <header class="header">
-        <img src="{% static 'tnbfaucet/assets/icons/hologram.svg' %}" alt="open blockchain explorer logo" height="30px" />
+        <img src="{% static 'tnbfaucet/assets/icons/hologram.svg' %}" alt="open blockchain explorer logo"
+            height="30px" />
         <h1 class="open-blockchain-explorer">Open Blockchain Explorer</h1>
     </header>
 
+    {% if messages %}
+    <div class="alert-container">
+        {% for message in messages %}
+            <div{% if message.tags %} class="alert show {{ message.tags }}" {% endif %}>
+                <img class="alert-icon" src="{% static 'tnbfaucet/assets/icons/'|add:message.tags|add:'.svg' %}" alt="alert icon" />
+                <div class="alert-body">
+                    <strong>{{ message.tags }}!</strong> 
+                    {{ message }}
+                </div>
+                <button type="button" onclick="this.parentElement.classList.remove('show')" class="alert-close-btn" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
     <main class="cover">
         <h1 class="title">TNB Faucet</h1>
         <h2 class="free-coins-text">I WANT FREE TNB COINS</h2>
-        {% if messages %}
-        <ul class="messages">
-            {% for message in messages %}
-            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>
-                {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}Important: {% endif %}
-                {{ message }}
-            </li>
-            {% endfor %}
-        </ul>
-        {% endif %}
         {% if form %}
         <form class="url-post-form" method="POST">
             {{ form.errors }}
@@ -74,7 +79,8 @@
                 <div class="steps">
                     <picture>
                         <source type="image/webp" srcset="{% static 'tnbfaucet/assets/guide/tweet.webp' %}">
-                        <img src="{% static 'tnbfaucet/assets/guide/tweet.png' %}" class="steps-img1" alt="example post image">
+                        <img src="{% static 'tnbfaucet/assets/guide/tweet.png' %}" class="steps-img1"
+                            alt="example post image">
                     </picture>
                     <span class="step-title"><b>1. Post on Social Media</b></span>
                     <ul>
@@ -91,7 +97,8 @@
                 <div class="steps">
                     <picture>
                         <source type="image/webp" srcset="{% static 'tnbfaucet/assets/guide/step2.webp' %}">
-                        <img src="{% static 'tnbfaucet/assets/guide/step2.png' %}" class="steps-img2" alt="step 2 illustration">
+                        <img src="{% static 'tnbfaucet/assets/guide/step2.png' %}" class="steps-img2"
+                            alt="step 2 illustration">
                     </picture>
                     <span class="step-title"><b>2. Copy Post URL</b></span>
                     <ul>
@@ -105,7 +112,8 @@
                 <div class="steps">
                     <picture>
                         <source type="image/webp" srcset="{% static 'tnbfaucet/assets/guide/step3.webp' %}">
-                        <img src="{% static 'tnbfaucet/assets/guide/step3.png' %}" class="steps-img2" alt="step 3 illustration">
+                        <img src="{% static 'tnbfaucet/assets/guide/step3.png' %}" class="steps-img2"
+                            alt="step 3 illustration">
                     </picture>
                     <span class="step-title"><b>3. Open TNB Faucet & Paste URL</b></span>
                     <ul>
@@ -118,7 +126,8 @@
                 <div class="steps">
                     <picture>
                         <source type="image/webp" srcset="{% static 'tnbfaucet/assets/guide/step4.webp' %}">
-                        <img src="{% static 'tnbfaucet/assets/guide/step4.png' %}" class="steps-img1" alt="step 4 illustration">
+                        <img src="{% static 'tnbfaucet/assets/guide/step4.png' %}" class="steps-img1"
+                            alt="step 4 illustration">
                     </picture>
                     <span class="step-title"><b>4. Connect to TNB Testnet</b></span>
                     <ul>
@@ -182,10 +191,11 @@
                             <a href="">one of the testnet bank nodes.</a>
                         </li>
                         <br />
-                        
+
                         <picture>
                             <source type="image/webp" srcset="{% static 'tnbfaucet/assets/faq/testnet_bank.webp' %}">
-                            <img src="{% static 'tnbfaucet/assets/faq/testnet_bank.png' %}" width="280px" class="steps-img1" alt="Add Testnet modal" style="border: 1px solid var(--border)">
+                            <img src="{% static 'tnbfaucet/assets/faq/testnet_bank.png' %}" width="280px"
+                                class="steps-img1" alt="Add Testnet modal" style="border: 1px solid var(--border)">
                         </picture>
 
                         <li>
