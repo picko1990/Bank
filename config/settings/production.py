@@ -40,42 +40,16 @@ LOGGING = {
             'formatter': 'verbose',
             'level': 'WARNING',
         },
-        'debug.handler': {
-            'class': 'logging.FileHandler',
-            'filename': os.path.join(LOGS_DIR, 'debug.log'),
-            'formatter': 'verbose',
-            'level': 'DEBUG',
-        },
-        'basic_slack_admins': {
-            'level': 'INFO',
-            'class': 'config.helpers.basic_slack_logger.SlackExceptionHandler',
-        },
-        'slack_admins': {
-            'level': 'ERROR',
-            'class': 'config.helpers.slack_logger.SlackExceptionHandler',
-        },
     },
     'loggers': {
-        'django.request': {
-            'handlers': ['slack_admins'],
-            'level': 'ERROR',
-            'propagate': False,
-        },
         'thenewboston': {
-            'handlers': ['error.handler', 'warning.handler', 'basic_slack_admins'],
+            'handlers': ['error.handler', 'warning.handler'],
             'level': 'WARNING',
             'propagate': True,
         },
-        'faucet': {
-            'handlers': [
-                'error.handler', 'warning.handler',
-                'debug.handler', 'basic_slack_admins'],
-            'level': 'DEBUG',
-            'propagate': True,
-        }
     },
     'version': 1,
-}
+} 
 
 if SENTRY_DSN:
     import sentry_sdk
