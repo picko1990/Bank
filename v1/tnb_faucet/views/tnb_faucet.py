@@ -18,6 +18,7 @@ from ..core import fb_post, tw_post
 from ..forms.forms import FaucetForm
 from ..models.tnb_faucet import FaucetModel, PostModel, FaucetOption
 from ..serializers.tnb_faucet import FormSerializer, FaucetOptionSerializer
+from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
@@ -246,8 +247,8 @@ class API(APIView):
         return Response(serializer.data)
 
     def post(self, request, format=None):
-        serializer = FormSerializer(data=request.data)
-        if serializer.is_valid():
+        serializer = FormSerializer(data=request.data, context={"request": request})
+        if serializer.is_valid(raise_exception=True):
             try:
                 amount = FaucetOption.objects.get(pk=serializer.data['faucet_option_id'])
                 url_str = serializer.data['url']
@@ -336,7 +337,8 @@ class API(APIView):
                                      f' transferred to {receiver_account_number}.')
                                 ))
                             else:
-                                return Response(error_response('Unable to obtain TNB account details!'))
+                                return Response(error_response('Unable to obtain TNB account details!'),
+                                status=status.HTTP_500_INTERNAL_SERVER_ERROR)
                         else:
                             if faucet_model:
                                 duration = (faucet_model.next_valid_access_time
@@ -349,21 +351,24 @@ class API(APIView):
                                     ('Slow down! Try again after ('
                                      f'{h} hours {m} mins and {sec} secs'
                                      ') till cooldown period expires.')
-                                ))
+                                ), status=status.HTTP_429_TOO_MANY_REQUESTS)
                             else:
                                 return Response(error_response(
                                     ('Same post cannot be used again! '
                                      ' Try again with a new one :P')
-                                ))
+                                ), status=status.HTTP_400_BAD_REQUEST)
                     else:
                         return Response(error_response(
                             ('Failed to extract information!'
                              ' Make sure post is public,'
                              ' contains #TNBFaucet and your account number')
-                        ))
+                        ), status=status.HTTP_400_BAD_REQUEST)
                 else:
-                    return Response(error_response('Only facebook and twitter URL allowed!'))
+                    return Response(error_response('Only facebook and twitter URL allowed!'),
+                    status=status.HTTP_400_BAD_REQUEST)
             except FaucetOption.DoesNotExist:
-                return Response(error_response('bad request format/data'))
+                return Response(error_response('bad request format/data'),
+                status=status.HTTP_400_BAD_REQUEST)
         else:
-            return Response(error_response('bad request format/data'))
+            return Response(error_response('bad request format/data'),
+            status=status.HTTP_400_BAD_REQUEST)
