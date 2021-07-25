@@ -16,7 +16,11 @@ from v1.self_configurations.helpers.signing_key import get_signing_key
 from v1.self_configurations.models.self_configuration import SelfConfiguration
 from ..core import fb_post, tw_post
 from ..forms.forms import FaucetForm
-from ..models.tnb_faucet import FaucetModel, PostModel
+from ..models.tnb_faucet import FaucetModel, PostModel, FaucetOption
+from ..serializers.tnb_faucet import FormSerializer, FaucetOptionSerializer
+from rest_framework import status
+from rest_framework.views import APIView
+from rest_framework.response import Response
 
 
 def get_platform(url_str: str):
@@ -77,6 +81,20 @@ def validate_expiry(account: Account, user_id: int):
         return faucet_model
     except FaucetModel.DoesNotExist:
         return False
+
+
+def error_response(content):
+    return {
+        "type": "error",
+        "content": content
+    }
+
+
+def success_response(content):
+    return {
+        "type": "success",
+        "content": content
+    }
 
 
 def faucet_view(request):
@@ -219,3 +237,138 @@ def faucet_view(request):
         'form': form
     }
     return render(request, 'index.html', context)
+
+
+class API(APIView):
+
+    def get(self, request, format=None):
+        queryset = FaucetOption.objects.all()
+        serializer = FaucetOptionSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def post(self, request, format=None):
+        serializer = FormSerializer(data=request.data, context={"request": request})
+        if serializer.is_valid(raise_exception=True):
+            try:
+                amount = FaucetOption.objects.get(pk=serializer.data['faucet_option_id'])
+                url_str = serializer.data['url']
+
+                platform = get_platform(url_str)
+                if platform:
+                    post = platform.process(url_str, amount)
+
+                    if post:
+                        receiver_account_number = post.get_account_number()
+                        post_id = post.get_id()
+                        platform = post.get_platform()
+                        user_id = post.get_user()
+
+                        bank_config = SelfConfiguration.objects.first()
+                        pv_config = bank_config.primary_validator
+
+                        signing_key = get_signing_key()
+                        sender_account_number = encode_verify_key(
+                            verify_key=signing_key.verify_key)
+
+                        account = validate_post_exists(
+                            receiver_account_number,
+                            post_id
+                        )
+                        faucet_model = validate_expiry(account, user_id)
+
+                        if account and not faucet_model:
+                            response = requests.get((
+                                f'{pv_config.protocol}://{pv_config.ip_address}'
+                                f':{pv_config.port}'f'/accounts/'
+                                f'{sender_account_number}/balance_lock'))
+
+                            if response.status_code == 200:
+                                balance_lock = response.json().get('balance_lock')
+                                if not balance_lock:
+                                    balance_lock = bank_config.node_identifier
+
+                                faucet_model, created = (
+                                    FaucetModel.objects.update_or_create(
+                                        account=account,
+                                        social_user_id=user_id,
+                                        social_type=platform,
+                                        defaults={
+                                            'next_valid_access_time': (
+                                                    timezone.now()
+                                                    + timedelta(hours=amount.delay))
+                                        })
+                                )
+
+                                post_model, created = PostModel.objects.get_or_create(
+                                    post_id=post_id,
+                                    reward=amount,
+                                    social_user=faucet_model
+                                )
+
+                                transactions = [
+                                    {
+                                        'amount': amount.coins,
+                                        'recipient': receiver_account_number,
+                                    },
+                                    {
+                                        'amount': bank_config.default_transaction_fee,
+                                        'recipient': bank_config.account_number,
+                                    },
+                                    {
+                                        'amount': pv_config.default_transaction_fee,
+                                        'recipient': pv_config.account_number,
+                                    }
+                                ]
+
+                                block = generate_block(
+                                    account_number=signing_key.verify_key,
+                                    balance_lock=balance_lock,
+                                    signing_key=signing_key,
+                                    transactions=transactions
+                                )
+                                serializer = BlockSerializerCreate(
+                                    data=block,
+                                    context={'request': request},
+                                )
+                                serializer.is_valid(raise_exception=True)
+                                block = serializer.save()
+                                return Response(success_response(
+                                    (f'SUCCESS! {amount.coins} faucet funds'
+                                     f' transferred to {receiver_account_number}.')
+                                ))
+                            else:
+                                return Response(error_response('Unable to obtain TNB account details!'),
+                                status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                        else:
+                            if faucet_model:
+                                duration = (faucet_model.next_valid_access_time
+                                            - timezone.now())
+                                totsec = duration.total_seconds()
+                                h = int(totsec // 3600)
+                                m = int((totsec % 3600) // 60)
+                                sec = round((totsec % 3600) % 60)
+                                return Response(error_response(
+                                    ('Slow down! Try again after ('
+                                     f'{h} hours {m} mins and {sec} secs'
+                                     ') till cooldown period expires.')
+                                ), status=status.HTTP_429_TOO_MANY_REQUESTS)
+                            else:
+                                return Response(error_response(
+                                    ('Same post cannot be used again! '
+                                     ' Try again with a new one :P')
+                                ), status=status.HTTP_400_BAD_REQUEST)
+                    else:
+                        return Response(error_response(
+                            ('Failed to extract information!'
+                             ' Make sure post is public,'
+                             ' contains #TNBFaucet and your account number')
+                        ), status=status.HTTP_400_BAD_REQUEST)
+                else:
+                    return Response(error_response('Only facebook and twitter URL allowed!'),
+                    status=status.HTTP_400_BAD_REQUEST)
+            except FaucetOption.DoesNotExist:
+                return Response(error_response('bad request format/data'),
+                status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response(error_response('bad request format/data'),
+            status=status.HTTP_400_BAD_REQUEST)
