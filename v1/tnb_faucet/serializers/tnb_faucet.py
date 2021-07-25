@@ -1,8 +1,9 @@
-# from thenewboston.utils.fields import all_field_names
-
-# from ..models.transaction_log import TransactionLog
 from rest_framework import serializers
 from ..models.tnb_faucet import FaucetOption
+from drf_recaptcha.fields import ReCaptchaV2Field, ReCaptchaV3Field
+# from thenewboston.utils.fields import all_field_names
+# from ..models.transaction_log import TransactionLog
+
 
 
 # class TransactionLogSerializer(serializers.ModelSerializer):
@@ -21,16 +22,16 @@ from ..models.tnb_faucet import FaucetOption
 
 
 class FaucetOptionSerializer(serializers.ModelSerializer):
-    string = serializers.SerializerMethodField()
-
     class Meta:
         model = FaucetOption
-        fields = ['id', 'string']
-
-    def get_string(self, obj):
-        return obj.__str__()
+        fields = ['id', 'coins', 'delay']
 
 
 class FormSerializer(serializers.Serializer):
+    recaptcha = ReCaptchaV2Field()
     url = serializers.URLField()
     faucet_option_id = serializers.IntegerField()
+
+    def validate(self, attrs):
+        attrs.pop("recaptcha")
+        return attrs

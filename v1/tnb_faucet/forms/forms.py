@@ -6,7 +6,7 @@ from ..models.tnb_faucet import FaucetOption
 
 
 class FaucetForm(forms.Form):
-    # captcha = ReCaptchaField(widget=ReCaptchaV2Invisible)
+    captcha = ReCaptchaField(widget=ReCaptchaV2Invisible)
     url = forms.URLField(required=True,
                          widget=forms.TextInput
                          (attrs={
