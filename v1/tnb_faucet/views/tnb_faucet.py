@@ -162,14 +162,17 @@ def faucet_view(request):
                                 {
                                     'amount': amount.coins,
                                     'recipient': receiver_account_number,
+                                    memo: "Thank you for using TNBExplorer testnet"
                                 },
                                 {
                                     'amount': bank_config.default_transaction_fee,
                                     'recipient': bank_config.account_number,
+                                    fee: "BANK"
                                 },
                                 {
                                     'amount': pv_config.default_transaction_fee,
                                     'recipient': pv_config.account_number,
+                                    fee: "PRIMARY_VALIDATOR"
                                 }
                             ]
 
@@ -309,14 +312,17 @@ class API(APIView):
                                     {
                                         'amount': amount.coins,
                                         'recipient': receiver_account_number,
+                                        memo: "Thank you for using TNBExplorer testnet"
                                     },
                                     {
                                         'amount': bank_config.default_transaction_fee,
                                         'recipient': bank_config.account_number,
+                                        fee: "BANK"
                                     },
                                     {
                                         'amount': pv_config.default_transaction_fee,
                                         'recipient': pv_config.account_number,
+                                        fee: "PRIMARY_VALIDATOR"
                                     }
                                 ]
 
