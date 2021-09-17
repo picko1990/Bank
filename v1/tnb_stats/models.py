@@ -1,13 +1,14 @@
 from django.db import models
+from django.utils import timezone
 
 
 class Stat(models.Model):
-    date = models.DateTimeField(auto_now_add=True)
-    shift = models.FloatField()
+    date = models.DateTimeField(blank=True, null=True, default=timezone.now)
+    shift = models.IntegerField()
     total = models.IntegerField()
     accounts = models.IntegerField()
     max_balance = models.IntegerField()
-    richest = models.CharField(max_length=100)
+    richest = models.CharField(max_length=64)
     top_5_wealth = models.IntegerField()
     top_5_ownership = models.FloatField()
     top_5_accounts = models.IntegerField()
