@@ -6,6 +6,7 @@ from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
 from rest_framework import permissions
 from rest_framework.routers import DefaultRouter
+from rest_framework.authtoken import views
 
 from v1.accounts.urls import router as accounts_router
 from v1.bank_transactions.urls import router as bank_transactions_router
@@ -45,6 +46,7 @@ urlpatterns = [
     path('api-auth/', include('rest_framework.urls')),
     path('faucet/', include('v1.tnb_faucet.urls')),
     path('stats/', include('v1.tnb_stats.urls')),
+    path("auth/api-token/", views.obtain_auth_token),
 
     # OpenAPI (Swagger)
     url(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
