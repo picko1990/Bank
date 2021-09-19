@@ -17,3 +17,4 @@ class StatList(generics.ListCreateAPIView):
     filterset_class = StatFilter
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticatedOrReadOnly]
+    pagination_class = None
