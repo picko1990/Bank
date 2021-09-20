@@ -21,6 +21,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'django_filters',
     'rest_framework',
+    'rest_framework.authtoken',
     'drf_yasg',
 
     # API (v1) network nodes
@@ -36,6 +37,7 @@ INSTALLED_APPS = [
     'v1.invalid_blocks.apps.InvalidBlocksConfig',
     'v1.self_configurations.apps.SelfConfigurationsConfig',
     'v1.tnb_faucet.apps.FaucetConfig',
+    'v1.tnb_stats.apps.TnbStatsConfig',
     'v1.validator_confirmation_services.apps.ValidatorConfirmationServicesConfig',
 
     # Third party
@@ -99,6 +101,8 @@ AUTH_PASSWORD_VALIDATORS = [
 RECAPTCHA_PUBLIC_KEY = os.getenv('RECAPTCHA_PUBLIC_KEY')
 RECAPTCHA_PRIVATE_KEY = os.getenv('RECAPTCHA_PRIVATE_KEY')
 RECAPTCHA_USE_SSL = False
+
+DRF_RECAPTCHA_SECRET_KEY = RECAPTCHA_PRIVATE_KEY
 
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
