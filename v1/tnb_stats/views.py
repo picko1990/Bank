@@ -12,7 +12,7 @@ class StatFilter(filters.FilterSet):
 
 
 class StatList(generics.ListCreateAPIView):
-    queryset = Stat.objects.all()
+    queryset = Stat.objects.cached()
     serializer_class = StatSerializer
     filterset_class = StatFilter
     authentication_classes = [TokenAuthentication]

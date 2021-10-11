@@ -1,5 +1,13 @@
 from django.db import models
 from django.utils import timezone
+from django.core.cache import cache
+from django.dispatch import receiver
+from django.db.models.signals import post_save
+
+
+class CustomStatManager(models.Manager):
+    def cached(self):
+        return cache.get_or_set("stat_objects", self.all(), 60*60*24)
 
 
 class Stat(models.Model):
@@ -22,5 +30,12 @@ class Stat(models.Model):
     top_50_ownership = models.FloatField()
     top_50_accounts = models.IntegerField()
 
+    objects = CustomStatManager()
+
     def __str__(self):
         return f"{self.date}"
+
+
+@receiver(post_save, sender=Stat)
+def stat_post_save_handler(sender, **kwargs):
+    cache.delete("stat_objects")
